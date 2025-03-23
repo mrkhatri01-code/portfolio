@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portfolio Website</title>
+  <link rel="stylesheet" href="styles.css">
+  <!-- Add Supabase JS Client BEFORE your scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <header class="header">
+    <div class="container header-container">
+      <button class="logo" onclick="scrollToSection('home')">
+        <img src="profile.png" alt="Profile" class="profile-image">
+        <span class="site-title">Prabhakar Portfolio</span>
+      </button>
+
+      <nav class="desktop-nav">
+        <button onclick="scrollToSection('home')" class="nav-item active">Home</button>
+        <button onclick="scrollToSection('projects')" class="nav-item">Projects</button>
+        <button onclick="scrollToSection('experience')" class="nav-item">Experience</button>
+        <button onclick="scrollToSection('education')" class="nav-item">Education</button>
+        <button onclick="scrollToSection('about')" class="nav-item">About</button>
+        <button onclick="scrollToSection('contact')" class="nav-item">Contact</button>
+        <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+          <i data-lucide="sun" class="icon sun-icon"></i>
+          <i data-lucide="moon" class="icon moon-icon"></i>
+          <span class="sr-only">Toggle theme</span>
+        </button>
+      </nav>
+
+      <button class="mobile-menu-button" aria-label="Open menu">
+        <i data-lucide="menu" class="icon"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="mobile-menu">
+    <div class="container mobile-menu-container">
+      <div class="mobile-menu-header">
+        <button class="logo" onclick="scrollToSection('home')">
+          <img src="profile.png" alt="Profile" class="profile-image">
+          <span class="site-title">Prabhakar Portfolio</span>
+        </button>
+        <button class="mobile-menu-close" aria-label="Close menu">
+          <i data-lucide="x" class="icon"></i>
+        </button>
+      </div>
+      <nav class="mobile-nav">
+        <button onclick="scrollToSection('home')" class="nav-item">Home</button>
+        <button onclick="scrollToSection('projects')" class="nav-item">Projects</button>
+        <button onclick="scrollToSection('experience')" class="nav-item">Experience</button>
+        <button onclick="scrollToSection('education')" class="nav-item">Education</button>
+        <button onclick="scrollToSection('about')" class="nav-item">About</button>
+        <button onclick="scrollToSection('contact')" class="nav-item">Contact</button>
+        <div class="mobile-theme-toggle">
+          <button id="mobile-theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+            <i data-lucide="sun" class="icon sun-icon"></i>
+            <i data-lucide="moon" class="icon moon-icon"></i>
+            <span class="sr-only">Toggle theme</span>
+          </button>
+        </div>
+      </nav>
+    </div>
+  </div>
+
+  <main>
+    <!-- Hero Section -->
+    <section id="home" class="hero-section">
+      <div class="container">
+        <h1 class="hero-title">Prabhakar Portfolio</h1>
+        <p class="hero-subtitle">Showcasing my best work in design, development, and creative projects</p>
+        <div class="hero-buttons">
+          <button class="button primary" onclick="scrollToSection('projects')">View My Work</button>
+          <button class="button outline" onclick="scrollToSection('contact')">Get In Touch</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Projects Section -->
+    <section id="projects" class="projects-section">
+      <div class="container">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">Featured Projects</h2>
+            <p class="section-description">Showcasing my best work and creative projects</p>
+          </div>
+          <a href="projects.html" class="button outline">
+            View All Projects
+            <i data-lucide="arrow-right" class="icon"></i>
+          </a>
+        </div>
+
+        <div class="projects-grid" id="projects-grid">
+          <!-- Projects will be loaded dynamically -->
+          <div class="loading">Loading projects...</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Experience Section -->
+    <section id="experience" class="experience-section">
+      <div class="container">
+        <h2 class="section-title">Experience</h2>
+        <div class="experience-grid" id="experience-grid">
+          <!-- Experience will be loaded dynamically -->
+          <div class="loading">Loading experience...</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Education Section -->
+    <section id="education" class="education-section">
+      <div class="container">
+        <h2 class="section-title">Education</h2>
+        <div class="education-grid" id="education-grid">
+          <!-- Education will be loaded dynamically -->
+          <div class="loading">Loading education...</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about-section">
+      <div class="container">
+        <div class="about-grid">
+          <div class="about-content">
+            <h2 class="section-title">About Me</h2>
+            <div class="about-text" id="about-text">
+              <!-- About text will be loaded dynamically -->
+              <p class="loading">Loading about information...</p>
+            </div>
+          </div>
+          <div class="about-image-container">
+            <img src="about-image.jpeg" alt="About Me" class="about-image" id="about-image">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact-section">
+      <div class="container">
+        <div class="contact-container">
+          <h2 class="section-title">Get In Touch</h2>
+          <p class="section-description">Have a question or want to work together? Send me a message!</p>
+          
+          <form id="contact-form" class="contact-form">
+            <div class="form-group">
+              <label for="name">Name</label>
+              <input type="text" id="name" name="name" placeholder="Your name" required>
+            </div>
+            
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input type="email" id="email" name="email" placeholder="Your email" required>
+            </div>
+            
+            <div class="form-group">
+              <label for="message">Message</label>
+              <textarea id="message" name="message" placeholder="Your message" rows="5" required></textarea>
+            </div>
+            
+            <div id="form-error" class="form-error"></div>
+            
+            <button type="submit" class="button primary submit-button">
+              <span class="button-text">Send Message</span>
+              <span class="button-loading hidden">
+                <i data-lucide="loader-2" class="icon spin"></i>
+                Sending...
+              </span>
+            </button>
+          </form>
+          
+          <div id="form-success" class="form-success hidden">
+            <div class="success-icon">
+              <i data-lucide="check" class="icon"></i>
+            </div>
+            <h3 class="success-title">Message Sent!</h3>
+            <p class="success-message">Thank you for reaching out. I'll get back to you soon.</p>
+            <button class="button outline" onclick="resetContactForm()">Send Another Message</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-info">
+          <h3 class="footer-title">Prabhakar Portfolio</h3>
+          <p class="footer-description">Showcasing my best work in design, development, and creative projects</p>
+          <a href="admin/login.html" class="admin-link">
+            <i data-lucide="lock" class="icon"></i>
+            Admin Access
+          </a>
+        </div>
+        
+        <div class="social-links" id="social-links">
+          <!-- Social links will be loaded dynamically -->
+        </div>
+      </div>
+      
+      <div class="footer-bottom">
+        <p>© <span id="current-year"></span> Prabhakar Portfolio. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Make sure scripts.js is loaded after Supabase -->
+  <script src="scripts.js"></script>
+  <script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+    
+    // Set current year in footer
+    document.getElementById('current-year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
+
