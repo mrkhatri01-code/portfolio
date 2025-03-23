@@ -19,7 +19,7 @@ A modern, responsive portfolio website built with Next.js, Tailwind CSS, and Sup
 - **Backend**: Next.js Server Components and Server Actions
 - **Database**: Supabase (PostgreSQL)
 - **Authentication**: Supabase Auth
-- **Deployment**: Vercel
+- **Deployment**: Netlify & Cloudfare
 
 ## Getting Started
 
