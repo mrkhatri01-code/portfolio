@@ -14,6 +14,7 @@ export async function createExperience(formData: FormData) {
   const current = formData.get("current") === "on"
   const description = (formData.get("description") as string) || null
   const location = (formData.get("location") as string) || null
+  const companyUrl = (formData.get("companyUrl") as string) || null
 
   if (!company || !position || !startDate) {
     return {
@@ -43,6 +44,7 @@ export async function createExperience(formData: FormData) {
         description,
         location,
         display_order: displayOrder,
+        company_url: companyUrl,
       },
     ])
 
@@ -74,6 +76,7 @@ export async function updateExperience(id: string, formData: FormData) {
   const current = formData.get("current") === "on"
   const description = (formData.get("description") as string) || null
   const location = (formData.get("location") as string) || null
+  const companyUrl = (formData.get("companyUrl") as string) || null
 
   if (!company || !position || !startDate) {
     return {
@@ -95,6 +98,7 @@ export async function updateExperience(id: string, formData: FormData) {
         description,
         location,
         updated_at: new Date().toISOString(),
+        company_url: companyUrl,
       })
       .eq("id", id)
 

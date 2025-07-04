@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login - Portfolio</title>
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="admin.css">
+  <!-- Add Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <div class="admin-container">
+    <div class="admin-header">
+      <a href="../index.html" class="back-link">
+        <i data-lucide="arrow-left" class="icon"></i>
+        Back to Home
+      </a>
+      <button id="admin-theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+        <i data-lucide="sun" class="icon sun-icon"></i>
+        <i data-lucide="moon" class="icon moon-icon"></i>
+        <span class="sr-only">Toggle theme</span>
+      </button>
+    </div>
+    
+    <div class="login-card">
+      <div class="login-logo">
+        <img src="../profile.png" alt="Logo" class="login-image">
+      </div>
+      <h1 class="login-title">Admin Login</h1>
+      <p class="login-description">Enter your credentials to access the admin area</p>
+      
+      <div class="login-alert">
+        <i data-lucide="alert-triangle" class="icon"></i>
+        <div>
+          <h3 class="alert-title">Supabase Authentication</h3>
+          <p class="alert-description">Login using your Supabase admin credentials.</p>
+        </div>
+      </div>
+      
+      <form id="login-form" class="login-form">
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" placeholder="admin@example.com" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="••••••••" required>
+        </div>
+        
+        <div id="login-error" class="login-error"></div>
+        
+        <button type="submit" class="button primary login-button">
+          <span class="button-text">Login</span>
+          <span class="button-loading hidden">
+            <i data-lucide="loader-2" class="icon spin"></i>
+            Logging in...
+          </span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Supabase configuration
+    const SUPABASE_URL = "https://aabzcizbrvgzaolmbozw.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFhYnpjaXpicnZnemFvbG1ib3p3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI0NDAxNjUsImV4cCI6MjA1ODAxNjE2NX0.6nYX20MTA2hMdPYcbR8-Gb5TWgOqiyaIxdniBiZ8XIA";
+    
+    // Initialize Supabase client
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    // DOM Elements
+    const themeToggle = document.getElementById("admin-theme-toggle");
+    const loginForm = document.getElementById("login-form");
+    const loginError = document.getElementById("login-error");
+    
+    // Theme Toggle
+    function initTheme() {
+      // Check if theme is stored in localStorage
+      const storedTheme = localStorage.getItem("theme");
+      
+      if (storedTheme) {
+        document.documentElement.classList.toggle("dark", storedTheme === "dark");
+      } else {
+        // Check system preference
+        const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        document.documentElement.classList.toggle("dark", prefersDark);
+        localStorage.setItem("theme", prefersDark ? "dark" : "light");
+      }
+    }
+    
+    function toggleTheme() {
+      const isDark = document.documentElement.classList.contains("dark");
+      document.documentElement.classList.toggle("dark", !isDark);
+      localStorage.setItem("theme", isDark ? "light" : "dark");
+    }
+    
+    // Handle login form submission
+    async function handleLoginForm() {
+      if (!loginForm) return;
+      
+      loginForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        
+        // Reset error message
+        loginError.textContent = "";
+        
+        // Get form data
+        const email = loginForm.elements.email.value;
+        const password = loginForm.elements.password.value;
+        
+        // Show loading state
+        const submitButton = loginForm.querySelector(".login-button");
+        submitButton.querySelector(".button-text").classList.add("hidden");
+        submitButton.querySelector(".button-loading").classList.remove("hidden");
+        submitButton.disabled = true;
+        
+        try {
+          // Sign in with Supabase
+          const { data, error } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+          });
+          
+          if (error) throw error;
+          
+          // Set a session cookie
+          localStorage.setItem("sb-auth-token", data.session.access_token);
+          
+          // Redirect to dashboard
+          window.location.href = "dashboard.html";
+        } catch (error) {
+          console.error("Login error:", error);
+          
+          // Show error
+          loginError.textContent = error.message || "Invalid email or password";
+          
+          // Reset button state
+          submitButton.querySelector(".button-text").classList.remove("hidden");
+          submitButton.querySelector(".button-loading").classList.add("hidden");
+          submitButton.disabled = false;
+        }
+      });
+    }
+    
+    // Initialize
+    document.addEventListener("DOMContentLoaded", () => {
+      // Initialize theme
+      initTheme();
+      
+      // Add event listeners
+      if (themeToggle) themeToggle.addEventListener("click", toggleTheme);
+      
+      // Handle login form
+      handleLoginForm();
+      
+      // Initialize Lucide icons
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>
+

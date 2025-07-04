@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Portfolio</title>
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="admin.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <div class="admin-container">
+    <header class="dashboard-header">
+      <h1 class="dashboard-title">Admin Dashboard</h1>
+      <div class="dashboard-actions">
+        <a href="../index.html" class="button ghost">View Site</a>
+        <button id="admin-theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+          <i data-lucide="sun" class="icon sun-icon"></i>
+          <i data-lucide="moon" class="icon moon-icon"></i>
+          <span class="sr-only">Toggle theme</span>
+        </button>
+        <button id="logout-button" class="button outline">Logout</button>
+      </div>
+    </header>
+
+    <main class="dashboard">
+      <div class="dashboard-tabs">
+        <button class="dashboard-tab active" data-tab="projects">Projects</button>
+        <button class="dashboard-tab" data-tab="experience">Experience</button>
+        <button class="dashboard-tab" data-tab="education">Education</button>
+        <button class="dashboard-tab" data-tab="messages">
+          Messages
+          <span class="badge" id="unread-badge">0</span>
+        </button>
+        <button class="dashboard-tab" data-tab="settings">Settings</button>
+      </div>
+
+      <div class="dashboard-content">
+        <!-- Projects Section -->
+        <section class="dashboard-section active" id="projects-section">
+          <div class="dashboard-section-header">
+            <h2 class="dashboard-section-title">Projects</h2>
+            <a href="projects/new.html" class="button primary">
+              <i data-lucide="plus-circle" class="icon"></i>
+              Add New Project
+            </a>
+          </div>
+
+          <div class="dashboard-cards" id="projects-cards">
+            <!-- Projects will be loaded dynamically -->
+            <div class="loading">Loading projects...</div>
+          </div>
+        </section>
+
+        <!-- Experience Section -->
+        <section class="dashboard-section" id="experience-section">
+          <div class="dashboard-section-header">
+            <h2 class="dashboard-section-title">Experience</h2>
+            <a href="experience/new.html" class="button primary">
+              <i data-lucide="plus-circle" class="icon"></i>
+              Add Experience
+            </a>
+          </div>
+
+          <div class="dashboard-cards" id="experience-cards">
+            <!-- Experience will be loaded dynamically -->
+            <div class="loading">Loading experience...</div>
+          </div>
+        </section>
+
+        <!-- Education Section -->
+        <section class="dashboard-section" id="education-section">
+          <div class="dashboard-section-header">
+            <h2 class="dashboard-section-title">Education</h2>
+            <a href="education/new.html" class="button primary">
+              <i data-lucide="plus-circle" class="icon"></i>
+              Add Education
+            </a>
+          </div>
+
+          <div class="dashboard-cards" id="education-cards">
+            <!-- Education will be loaded dynamically -->
+            <div class="loading">Loading education...</div>
+          </div>
+        </section>
+
+        <!-- Messages Section -->
+        <section class="dashboard-section" id="messages-section">
+          <div class="dashboard-section-header">
+            <h2 class="dashboard-section-title">Messages</h2>
+            <a href="messages.html" class="button primary">
+              <i data-lucide="message-square" class="icon"></i>
+              View All Messages
+            </a>
+          </div>
+
+          <div class="message-list" id="message-list">
+            <!-- Messages will be loaded dynamically -->
+            <div class="loading">Loading messages...</div>
+          </div>
+        </section>
+
+        <!-- Settings Section -->
+        <section class="dashboard-section" id="settings-section">
+          <div class="dashboard-section-header">
+            <h2 class="dashboard-section-title">Settings</h2>
+          </div>
+
+          <div class="settings-grid">
+            <div class="dashboard-card">
+              <div class="dashboard-card-header">
+                <div>
+                  <h3 class="dashboard-card-title">Site Settings</h3>
+                  <p class="dashboard-card-subtitle">Manage your site title, description, and about text</p>
+                </div>
+              </div>
+              <div class="dashboard-card-content">
+                <a href="settings.html?tab=general" class="button outline">Edit Site Settings</a>
+              </div>
+            </div>
+
+            <div class="dashboard-card">
+              <div class="dashboard-card-header">
+                <div>
+                  <h3 class="dashboard-card-title">Profile</h3>
+                  <p class="dashboard-card-subtitle">Manage your profile image and resume</p>
+                </div>
+              </div>
+              <div class="dashboard-card-content">
+                <a href="settings.html?tab=profile" class="button outline">Edit Profile</a>
+              </div>
+            </div>
+
+            <div class="dashboard-card">
+              <div class="dashboard-card-header">
+                <div>
+                  <h3 class="dashboard-card-title">Social Links</h3>
+                  <p class="dashboard-card-subtitle">Manage your social media links</p>
+                </div>
+              </div>
+              <div class="dashboard-card-content">
+                <a href="settings.html?tab=social" class="button outline">Edit Social Links</a>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- Confirmation Modal -->
+  <div class="modal" id="confirmation-modal">
+    <div class="modal-overlay"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Confirm Action</h3>
+        <button class="modal-close" aria-label="Close modal">
+          <i data-lucide="x" class="icon"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p id="confirmation-message">Are you sure you want to delete this item? This action cannot be undone.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="button outline" id="cancel-action">Cancel</button>
+        <button class="button destructive" id="confirm-action">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Supabase configuration
+    const SUPABASE_URL = "https://aabzcizbrvgzaolmbozw.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFhYnpjaXpicnZnemFvbG1ib3p3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI0NDAxNjUsImV4cCI6MjA1ODAxNjE2NX0.6nYX20MTA2hMdPYcbR8-Gb5TWgOqiyaIxdniBiZ8XIA";
+    
+    // Initialize Supabase client
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    // Check if user is logged in
+    async function checkAuth() {
+      try {
+        const { data, error } = await supabase.auth.getSession();
+        
+        if (error) throw error;
+        
+        if (!data.session) {
+          // Not logged in, redirect to login page
+          window.location.href = "login.html";
+          return false;
+        }
+        
+        return true;
+      } catch (error) {
+        console.error("Auth error:", error);
+        // Redirect to login page on error
+        window.location.href = "login.html";
+        return false;
+      }
+    }
+    
+    // Handle logout
+    async function handleLogout() {
+      try {
+        const { error } = await supabase.auth.signOut();
+        
+        if (error) throw error;
+        
+        // Clear local storage
+        localStorage.removeItem("sb-auth-token");
+        
+        // Redirect to login page
+        window.location.href = "login.html";
+      } catch (error) {
+        console.error("Logout error:", error);
+        // Redirect anyway
+        window.location.href = "login.html";
+      }
+    }
+    
+    // Initialize
+    document.addEventListener("DOMContentLoaded", async () => {
+      // Check if user is logged in
+      const isLoggedIn = await checkAuth();
+      
+      if (!isLoggedIn) return;
+      
+      // Add logout event listener
+      const logoutButton = document.getElementById("logout-button");
+      if (logoutButton) {
+        logoutButton.addEventListener("click", handleLogout);
+      }
+      
+      // Initialize Lucide icons
+      lucide.createIcons();
+      
+      // Rest of your initialization code...
+      // (Tab switching, loading data, etc.)
+    });
+  </script>
+</body>
+</html>
+

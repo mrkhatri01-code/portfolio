@@ -5,7 +5,6 @@ import { revalidatePath } from "next/cache"
 import { createServerSupabaseClient } from "@/lib/supabase"
 import { deleteFile, uploadFile, STORAGE_BUCKETS, initializeStorage } from "@/lib/storage"
 
-// Update the updateSiteSettings function to handle the new social media fields
 export async function updateSiteSettings(formData: FormData) {
   try {
     const siteTitle = formData.get("siteTitle") as string
@@ -15,6 +14,8 @@ export async function updateSiteSettings(formData: FormData) {
     const behanceUrl = formData.get("behanceUrl") as string
     const githubUrl = formData.get("githubUrl") as string
     const linkedinUrl = formData.get("linkedinUrl") as string
+
+    // Optional new social media fields
     const facebookUrl = formData.get("facebookUrl") as string
     const twitterUrl = formData.get("twitterUrl") as string
     const discordUrl = formData.get("discordUrl") as string
@@ -28,8 +29,8 @@ export async function updateSiteSettings(formData: FormData) {
       }
     }
 
-    // Update settings
-    const updatedSettings = await settingsManager.updateSettings({
+    // Create base settings object with required fields
+    const settingsData: any = {
       site_title: siteTitle,
       site_description: siteDescription,
       about_text: aboutText || null,
@@ -37,11 +38,33 @@ export async function updateSiteSettings(formData: FormData) {
       behance_url: behanceUrl || null,
       github_url: githubUrl || null,
       linkedin_url: linkedinUrl || null,
-      facebook_url: facebookUrl || null,
-      twitter_url: twitterUrl || null,
-      discord_url: discordUrl || null,
-      youtube_url: youtubeUrl || null,
-    })
+    }
+
+    // Add new social media fields if they exist in the database
+    // We'll handle this by checking if the current settings have these fields
+    const currentSettings = await settingsManager.getSettings()
+
+    if (currentSettings) {
+      // Only add fields that exist in the current settings
+      if ("facebook_url" in currentSettings) {
+        settingsData.facebook_url = facebookUrl || null
+      }
+
+      if ("twitter_url" in currentSettings) {
+        settingsData.twitter_url = twitterUrl || null
+      }
+
+      if ("discord_url" in currentSettings) {
+        settingsData.discord_url = discordUrl || null
+      }
+
+      if ("youtube_url" in currentSettings) {
+        settingsData.youtube_url = youtubeUrl || null
+      }
+    }
+
+    // Update settings
+    const updatedSettings = await settingsManager.updateSettings(settingsData)
 
     // Revalidate paths
     revalidatePath("/")

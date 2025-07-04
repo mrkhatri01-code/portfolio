@@ -17,15 +17,16 @@ export default async function ProjectsPage() {
   const siteDescription =
     settings?.site_description || "Showcasing my best work in design, development, and creative projects"
 
+  // Safely extract social links, handling potential undefined values
   const socialLinks = {
-    instagram: settings?.instagram_url,
-    behance: settings?.behance_url,
-    github: settings?.github_url,
-    linkedin: settings?.linkedin_url,
-    facebook: settings?.facebook_url,
-    twitter: settings?.twitter_url,
-    discord: settings?.discord_url,
-    youtube: settings?.youtube_url,
+    instagram: settings?.instagram_url || undefined,
+    behance: settings?.behance_url || undefined,
+    github: settings?.github_url || undefined,
+    linkedin: settings?.linkedin_url || undefined,
+    facebook: settings?.facebook_url || undefined,
+    twitter: settings?.twitter_url || undefined,
+    discord: settings?.discord_url || undefined,
+    youtube: settings?.youtube_url || undefined,
   }
 
   return (

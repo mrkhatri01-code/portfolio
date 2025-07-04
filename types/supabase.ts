@@ -148,6 +148,7 @@ export interface Database {
           description: string | null
           location: string | null
           display_order: number
+          company_url?: string | null
           created_at: string
           updated_at: string
         }
@@ -161,6 +162,7 @@ export interface Database {
           description?: string | null
           location?: string | null
           display_order?: number
+          company_url?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -174,6 +176,7 @@ export interface Database {
           description?: string | null
           location?: string | null
           display_order?: number
+          company_url?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -220,6 +223,7 @@ export interface Database {
           twitter_url: string | null
           discord_url: string | null
           youtube_url: string | null
+          tiktok_url: string | null
           created_at: string
           updated_at: string
         }
@@ -238,6 +242,7 @@ export interface Database {
           twitter_url?: string | null
           discord_url?: string | null
           youtube_url?: string | null
+          tiktok_url?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -256,6 +261,7 @@ export interface Database {
           twitter_url?: string | null
           discord_url?: string | null
           youtube_url?: string | null
+          tiktok_url?: string | null
           created_at?: string
           updated_at?: string
         }
