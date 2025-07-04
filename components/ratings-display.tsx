@@ -68,4 +68,3 @@ export function RatingsDisplay({ ratings, averageRating }: RatingsDisplayProps) 
     </div>
   )
 }
-

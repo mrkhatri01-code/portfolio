@@ -12,4 +12,3 @@ CREATE TABLE IF NOT EXISTS public.project_files (
 
 -- Add index for faster queries
 CREATE INDEX IF NOT EXISTS idx_project_files_project_id ON public.project_files(project_id);
-

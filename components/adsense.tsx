@@ -43,4 +43,3 @@ export function AdSense({ slot, format = "auto", responsive = true, style }: AdS
     </div>
   )
 }
-

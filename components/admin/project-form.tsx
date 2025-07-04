@@ -287,4 +287,3 @@ export function ProjectForm({ project, mode }: ProjectFormProps) {
     </Card>
   )
 }
-

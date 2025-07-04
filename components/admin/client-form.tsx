@@ -263,4 +263,3 @@ export function ClientForm({ client, isEditing = false }: ClientFormProps) {
     </form>
   )
 }
-

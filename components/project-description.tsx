@@ -15,4 +15,3 @@ export function ProjectDescription({ description, className }: ProjectDescriptio
     />
   )
 }
-

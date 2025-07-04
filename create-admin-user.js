@@ -57,4 +57,3 @@ async function createAdminUser() {
 
 // Run the function
 createAdminUser()
-

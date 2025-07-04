@@ -130,4 +130,3 @@ export function ProjectFilesGallery({ files }: ProjectFilesGalleryProps) {
     </div>
   )
 }
-

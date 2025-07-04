@@ -23,4 +23,3 @@ export default MyComponent
 // Note: This is a placeholder.  The actual solution requires the original
 // app/admin/projects/page.tsx code to be properly merged.  The variables
 // might need to be imported from a library instead of being declared here.
-

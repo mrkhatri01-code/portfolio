@@ -183,4 +183,3 @@ export function Footer({ siteTitle, siteDescription, socialLinks }: FooterProps)
     </footer>
   )
 }
-

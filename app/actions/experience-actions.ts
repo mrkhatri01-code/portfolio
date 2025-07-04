@@ -166,4 +166,3 @@ export async function updateExperienceOrder(id: string, newOrder: number) {
     }
   }
 }
-

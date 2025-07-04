@@ -151,4 +151,3 @@ export function ClientsSection({ clients }: ClientsSectionProps) {
     </section>
   )
 }
-

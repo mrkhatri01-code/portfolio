@@ -214,4 +214,3 @@ export default async function ClientsPage() {
     </div>
   )
 }
-

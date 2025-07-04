@@ -4,4 +4,3 @@ export const STORAGE_BUCKETS = {
   PROFILE: "profile-images",
   RESUME: "resumes",
 }
-

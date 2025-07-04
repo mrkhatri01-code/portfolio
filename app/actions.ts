@@ -168,4 +168,3 @@ export async function addYoutubeVideo(projectId: string, youtubeUrl: string, tit
     }
   }
 }
-

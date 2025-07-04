@@ -101,4 +101,3 @@ function createDummyClient() {
     },
   } as unknown as ReturnType<typeof createClient<Database>>
 }
-

@@ -645,4 +645,3 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.error("Error initializing dashboard:", error)
   }
 })
-

@@ -498,4 +498,3 @@ document.addEventListener("DOMContentLoaded", () => {
   // Initialize scroll position
   handleScroll()
 })
-

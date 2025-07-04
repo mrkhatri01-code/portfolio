@@ -1,4 +1,3 @@
 interface Window {
   adsbygoogle?: any[]
 }
-

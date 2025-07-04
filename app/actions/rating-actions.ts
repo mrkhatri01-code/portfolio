@@ -123,4 +123,3 @@ export async function deleteRating(ratingId: string) {
     }
   }
 }
-

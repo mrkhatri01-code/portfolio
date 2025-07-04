@@ -57,4 +57,3 @@ export function RatingStars({ value, max = 5, size = "md", readOnly = false, onC
     </div>
   )
 }
-

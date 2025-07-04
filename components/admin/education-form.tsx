@@ -208,4 +208,3 @@ export function EducationForm({ education, mode }: EducationFormProps) {
     </Card>
   )
 }
-

@@ -419,4 +419,3 @@ window.db = {
   // Storage
   uploadFile,
 }
-

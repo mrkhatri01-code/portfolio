@@ -31,4 +31,3 @@ export default async function EditClientPage({ params }: EditClientPageProps) {
     </div>
   )
 }
-

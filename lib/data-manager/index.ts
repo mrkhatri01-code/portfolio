@@ -644,4 +644,3 @@ export const experienceManager = new ExperienceManager()
 export const messageManager = new MessageManager()
 export const settingsManager = new SettingsManager()
 export const ratingManager = new RatingManager()
-

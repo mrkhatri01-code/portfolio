@@ -262,4 +262,3 @@ export async function getProjectAverageRating(projectId: string) {
     return null
   }
 }
-

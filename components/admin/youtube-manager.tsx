@@ -222,4 +222,3 @@ export function YouTubeManager({ projectId, initialVideos }: YouTubeManagerProps
     </div>
   )
 }
-

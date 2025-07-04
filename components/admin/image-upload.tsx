@@ -70,4 +70,3 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onChange, value }) => {
 }
 
 export default ImageUpload
-

@@ -240,4 +240,3 @@ export function Header({ siteTitle }: HeaderProps) {
     </header>
   )
 }
-

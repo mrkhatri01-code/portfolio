@@ -16,4 +16,3 @@ CREATE TABLE IF NOT EXISTS clients (
 
 -- Create index on featured column for faster queries
 CREATE INDEX IF NOT EXISTS idx_clients_featured ON clients(featured);
-

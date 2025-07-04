@@ -480,4 +480,3 @@ export function FileManager({ projectId }: FileManagerProps) {
     </Tabs>
   )
 }
-

@@ -230,4 +230,3 @@ export function getStorageProvider(): StorageInterface {
 // Export a singleton instance
 const storageProvider = getStorageProvider()
 export default storageProvider
-

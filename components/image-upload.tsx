@@ -329,4 +329,3 @@ export function ImageUpload({ projectId }: ImageUploadProps) {
     </div>
   )
 }
-

@@ -115,4 +115,3 @@ export function YouTubeAdd({ projectId }: YouTubeAddProps) {
     </div>
   )
 }
-

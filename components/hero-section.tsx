@@ -36,4 +36,3 @@ export function HeroSection({ title, subtitle }: HeroSectionProps) {
     </section>
   )
 }
-

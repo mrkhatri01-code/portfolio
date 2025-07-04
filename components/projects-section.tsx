@@ -101,4 +101,3 @@ export function ProjectsSection({ projects }: ProjectsSectionProps) {
     </section>
   )
 }
-

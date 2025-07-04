@@ -132,4 +132,3 @@ export function RatingForm({ projectId, onSuccess }: RatingFormProps) {
     </Card>
   )
 }
-

@@ -87,4 +87,3 @@ export async function initializeStorage() {
   console.log("Storage initialization skipped - using existing buckets")
   return true
 }
-

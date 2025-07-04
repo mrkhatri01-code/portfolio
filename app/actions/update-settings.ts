@@ -27,4 +27,3 @@ export async function updateProfileImage(imageUrl: string) {
 }
 
 // Add this SQL query to update the settings with the about image
-

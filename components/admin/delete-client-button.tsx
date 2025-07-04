@@ -64,4 +64,3 @@ export function DeleteClientButton({ clientId, clientName, children }: DeleteCli
     </>
   )
 }
-

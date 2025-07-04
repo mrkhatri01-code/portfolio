@@ -38,4 +38,3 @@ export function preserveTextFormatting(text: string): string {
   if (!text) return ""
   return text.replace(/\n/g, "<br />")
 }
-

@@ -31,4 +31,3 @@ export function YouTubeVideo({ youtubeUrl, title }: YouTubeVideoProps) {
     </div>
   )
 }
-
