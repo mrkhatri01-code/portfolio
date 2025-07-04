@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster"
 import { Analytics } from "@/components/analytics"
 import { cn } from "@/lib/utils"
 import "@/app/globals.css"
+import { Suspense } from "react"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -46,11 +47,13 @@ export default function RootLayout({
         />
       </head>
       <body className={cn("min-h-screen bg-background font-sans antialiased", inter.className)}>
-        <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-          {children}
-          <Toaster />
-          <Analytics />
-        </ThemeProvider>
+        <Suspense fallback={<div className="flex h-screen w-full items-center justify-center">Loading…</div>}>
+          <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+            {children}
+            <Toaster />
+            <Analytics />
+          </ThemeProvider>
+        </Suspense>
       </body>
     </html>
   )
