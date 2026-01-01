@@ -8,6 +8,8 @@ import { fetchYouTubeStats } from "@/app/actions/youtube"
 interface ChannelStats {
   subscriberCount: number
   viewCount: number
+  dailyViews: number
+  monthlyViews: number
 }
 
 interface YouTubeStatsProps {
@@ -19,21 +21,12 @@ export function YouTubeStats({ channelIds, className }: YouTubeStatsProps) {
   const [stats, setStats] = useState<ChannelStats | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [retryCount, setRetryCount] = useState(0)
-  const maxRetries = 3
 
   useEffect(() => {
     const getChannelStats = async () => {
       try {
         setLoading(true)
         setError(null)
-
-        // Don't attempt to fetch if no channel IDs are provided
-        if (!channelIds || channelIds.length === 0) {
-          setStats({ subscriberCount: 0, viewCount: 0 })
-          setLoading(false)
-          return
-        }
 
         const combinedStats = await fetchYouTubeStats(channelIds)
 
@@ -42,24 +35,9 @@ export function YouTubeStats({ channelIds, className }: YouTubeStatsProps) {
         }
 
         setStats(combinedStats)
-        // Reset retry count on success
-        setRetryCount(0)
       } catch (err) {
         console.error("Error fetching YouTube stats:", err)
         setError(err instanceof Error ? err.message : "Failed to fetch YouTube stats")
-
-        // Auto-retry with exponential backoff
-        if (retryCount < maxRetries) {
-          const delay = Math.pow(2, retryCount) * 1000 // 1s, 2s, 4s
-          console.log(`Retrying in ${delay}ms... (${retryCount + 1}/${maxRetries})`)
-
-          setTimeout(() => {
-            setRetryCount((prev) => prev + 1)
-          }, delay)
-        } else {
-          // After max retries, set default stats
-          setStats({ subscriberCount: 0, viewCount: 0 })
-        }
       } finally {
         setLoading(false)
       }
@@ -67,11 +45,12 @@ export function YouTubeStats({ channelIds, className }: YouTubeStatsProps) {
 
     getChannelStats()
 
-    // Set up interval to refresh stats every 15 minutes instead of 5 to reduce API calls
-    const intervalId = setInterval(getChannelStats, 15 * 60 * 1000)
+    // Set up interval to refresh stats less frequently to avoid rate limiting
+    // Refresh every 30 minutes instead of 5 minutes
+    const intervalId = setInterval(getChannelStats, 30 * 60 * 1000)
 
     return () => clearInterval(intervalId)
-  }, [channelIds, retryCount])
+  }, [channelIds])
 
   // Format numbers with commas
   const formatNumber = (num: number): string => {
@@ -87,42 +66,18 @@ export function YouTubeStats({ channelIds, className }: YouTubeStatsProps) {
     )
   }
 
-  // If there's an error but we're still retrying, show a retry message
-  if (error && retryCount < maxRetries) {
-    return (
-      <div className={`flex items-center justify-center py-4 ${className}`}>
-        <Loader2 className="h-5 w-5 animate-spin text-primary mr-2" />
-        <span>
-          Retrying... ({retryCount + 1}/{maxRetries})
-        </span>
-      </div>
-    )
+  if (error) {
+    return <div className={`text-sm text-muted-foreground ${className}`}>Unable to load YouTube stats: {error}</div>
   }
 
-  // If there's an error after all retries, or if stats is null, show a fallback UI
-  if ((error && retryCount >= maxRetries) || !stats) {
-    return (
-      <div className={className}>
-        <Card className="bg-muted/50">
-          <CardContent className="flex justify-around py-4">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-primary">--</div>
-              <div className="text-sm text-muted-foreground">Subscribers</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-primary">--</div>
-              <div className="text-sm text-muted-foreground">Total Views</div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    )
+  if (!stats) {
+    return null
   }
 
   return (
     <div className={className}>
       <Card className="bg-muted/50">
-        <CardContent className="flex justify-around py-4">
+        <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-4 py-4">
           <div className="text-center">
             <div className="text-2xl font-bold text-primary">{formatNumber(stats.subscriberCount)}</div>
             <div className="text-sm text-muted-foreground">Subscribers</div>
@@ -130,6 +85,14 @@ export function YouTubeStats({ channelIds, className }: YouTubeStatsProps) {
           <div className="text-center">
             <div className="text-2xl font-bold text-primary">{formatNumber(stats.viewCount)}</div>
             <div className="text-sm text-muted-foreground">Total Views</div>
+          </div>
+          <div className="text-center">
+            <div className="text-2xl font-bold text-primary">{formatNumber(stats.dailyViews)}</div>
+            <div className="text-sm text-muted-foreground">Daily Views</div>
+          </div>
+          <div className="text-center">
+            <div className="text-2xl font-bold text-primary">{formatNumber(stats.monthlyViews)}</div>
+            <div className="text-sm text-muted-foreground">Monthly Views</div>
           </div>
         </CardContent>
       </Card>

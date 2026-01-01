@@ -75,10 +75,7 @@ const config = {
       },
     },
   },
-  /* The animate plugin depends on the full `tailwindcss` package, which
-     isn’t available in the next-lite runtime.  Commenting it out prevents
-     the “Cannot find module 'tailwindcss'” build error. */
-  plugins: [],
+  plugins: [require("tailwindcss-animate")],
 } satisfies Config
 
 export default config

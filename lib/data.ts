@@ -2,6 +2,9 @@ import { projectManager, educationManager, experienceManager, settingsManager, r
 import { clientManager } from "@/lib/data-manager/client-manager"
 import { unstable_noStore as noStore } from "next/cache"
 import { createServerSupabaseClient } from "@/lib/supabase"
+import { faqManager } from "@/lib/data-manager/faq-manager"
+import { resourceManager } from "@/lib/data-manager/resource-manager"
+import { blogManager } from "@/lib/data-manager/blog-manager"
 
 // Default settings to use when database is not available
 const DEFAULT_SETTINGS = {
@@ -187,32 +190,11 @@ export async function getProjectBySlug(slugOrId: string) {
       console.error("Error fetching project videos:", error)
     }
 
-    // Get project images
-    let projectImages = []
-
-    try {
-      const supabase = createServerSupabaseClient()
-      const { data, error } = await supabase
-        .from("project_images")
-        .select("*")
-        .eq("project_id", project.id)
-        .order("display_order", { ascending: true })
-
-      if (!error) {
-        projectImages = data || []
-      } else {
-        console.error("Error fetching project images:", error)
-      }
-    } catch (error) {
-      console.error("Error fetching project images:", error)
-    }
-
     return {
       ...project,
       ratings,
       averageRating,
       videos,
-      project_images: projectImages,
     }
   } catch (error) {
     console.error("Error in getProjectBySlug:", error)
@@ -260,5 +242,86 @@ export async function getProjectAverageRating(projectId: string) {
   } catch (error) {
     console.error("Error fetching project average rating:", error)
     return null
+  }
+}
+
+// FAQs
+export async function getFAQs() {
+  noStore()
+  try {
+    return await faqManager.getOrdered()
+  } catch (error) {
+    console.error("Error fetching FAQs:", error)
+    return []
+  }
+}
+
+// Resources
+export async function getResources() {
+  noStore()
+  try {
+    return await resourceManager.getOrdered()
+  } catch (error) {
+    console.error("Error fetching resources:", error)
+    return []
+  }
+}
+
+// Blogs
+export async function getBlogs() {
+  noStore()
+  try {
+    return await blogManager.getPublished({
+      orderBy: "published_at",
+      orderDirection: "desc",
+    })
+  } catch (error) {
+    console.error("Error fetching blogs:", error)
+    return []
+  }
+}
+
+export async function getBlogBySlug(slug: string) {
+  noStore()
+  try {
+    const blog = await blogManager.getBySlug(slug)
+    if (blog) {
+      // Increment view count
+      await blogManager.incrementViewCount(blog.id)
+    }
+    return blog
+  } catch (error) {
+    console.error("Error fetching blog by slug:", error)
+    return null
+  }
+}
+
+export async function getBlogById(id: string) {
+  noStore()
+  try {
+    return await blogManager.getById(id)
+  } catch (error) {
+    console.error("Error fetching blog by id:", error)
+    return null
+  }
+}
+
+export async function getBlogsByCategory(categorySlug: string) {
+  noStore()
+  try {
+    return await blogManager.getByCategory(categorySlug)
+  } catch (error) {
+    console.error("Error fetching blogs by category:", error)
+    return []
+  }
+}
+
+export async function getBlogsByTag(tagSlug: string) {
+  noStore()
+  try {
+    return await blogManager.getByTag(tagSlug)
+  } catch (error) {
+    console.error("Error fetching blogs by tag:", error)
+    return []
   }
 }

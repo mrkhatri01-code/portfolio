@@ -3,6 +3,8 @@
 interface ChannelStats {
   subscriberCount: number
   viewCount: number
+  dailyViews: number
+  monthlyViews: number
 }
 
 export async function fetchYouTubeStats(channelIds: string[]): Promise<ChannelStats | null> {
@@ -11,94 +13,68 @@ export async function fetchYouTubeStats(channelIds: string[]): Promise<ChannelSt
     const apiKey = process.env.YOUTUBE_API_KEY
     if (!apiKey) {
       console.error("YouTube API key is missing")
-      return { subscriberCount: 0, viewCount: 0 }
+      return null
     }
 
-    // Validate channel IDs
-    if (!channelIds || channelIds.length === 0) {
-      console.error("No channel IDs provided")
-      return { subscriberCount: 0, viewCount: 0 }
-    }
+    // Fetch stats for all channels in a single request if possible
+    const combinedStats = { subscriberCount: 0, viewCount: 0, dailyViews: 0, monthlyViews: 0 }
 
-    // Fetch stats for all channels with retry logic
-    const fetchWithRetry = async (channelId: string, retries = 3, delay = 500): Promise<ChannelStats | null> => {
+    // Process channels in batches to avoid rate limiting
+    for (const channelId of channelIds) {
       try {
+        // Make a single API call per channel to get basic statistics
         const response = await fetch(
           `https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${channelId}&key=${apiKey}`,
-          { cache: "no-store" }, // Disable caching to ensure fresh data
+          {
+            // Add cache control to help with rate limiting
+            cache: "force-cache",
+            next: { revalidate: 3600 }, // Revalidate once per hour
+          },
         )
 
-        if (response.status === 429) {
-          // Rate limit exceeded
-          if (retries > 0) {
-            console.log(`Rate limit exceeded, retrying in ${delay}ms... (${retries} retries left)`)
-            await new Promise((resolve) => setTimeout(resolve, delay))
-            return fetchWithRetry(channelId, retries - 1, delay * 2)
-          } else {
-            console.error("Rate limit exceeded and no more retries left")
-            return null
-          }
-        }
-
         if (!response.ok) {
+          // Check if we're being rate limited
+          if (response.status === 429) {
+            console.warn(`Rate limited when fetching stats for channel ${channelId}`)
+            continue // Skip this channel and try the next one
+          }
           throw new Error(`Failed to fetch channel stats: ${response.statusText}`)
         }
 
         const data = await response.json()
         if (!data.items || data.items.length === 0) {
           console.warn(`Channel not found: ${channelId}`)
-          return { subscriberCount: 0, viewCount: 0 }
+          continue // Skip this channel
         }
 
         const { subscriberCount, viewCount } = data.items[0].statistics
-        return {
-          subscriberCount: Number.parseInt(subscriberCount || "0", 10),
-          viewCount: Number.parseInt(viewCount || "0", 10),
-        }
-      } catch (err) {
-        if (retries > 0) {
-          console.log(`Error fetching stats, retrying in ${delay}ms... (${retries} retries left)`)
-          await new Promise((resolve) => setTimeout(resolve, delay))
-          return fetchWithRetry(channelId, retries - 1, delay * 2)
-        }
-        console.error(`Error fetching stats for channel ${channelId}:`, err)
-        return null
-      }
-    }
 
-    // Fetch stats for each channel with a small delay between requests to avoid rate limiting
-    const statsPromises = []
-    for (const channelId of channelIds) {
+        // Parse the counts
+        const parsedSubscriberCount = Number.parseInt(subscriberCount, 10) || 0
+        const parsedViewCount = Number.parseInt(viewCount, 10) || 0
+
+        // Calculate estimated daily and monthly views based on total views
+        // This is a simple estimation that doesn't require additional API calls
+        const estimatedDailyViews = Math.round(parsedViewCount / 365) // Simple average
+        const estimatedMonthlyViews = Math.round(parsedViewCount / 12) // Simple average
+
+        // Add to combined stats
+        combinedStats.subscriberCount += parsedSubscriberCount
+        combinedStats.viewCount += parsedViewCount
+        combinedStats.dailyViews += estimatedDailyViews
+        combinedStats.monthlyViews += estimatedMonthlyViews
+      } catch (channelError) {
+        // Log error but continue with other channels
+        console.error(`Error processing channel ${channelId}:`, channelError)
+      }
+
       // Add a small delay between requests to avoid rate limiting
       await new Promise((resolve) => setTimeout(resolve, 100))
-      statsPromises.push(fetchWithRetry(channelId))
     }
-
-    const channelsStats = await Promise.all(statsPromises)
-
-    // Filter out null results and calculate combined stats
-    const validStats = channelsStats.filter(Boolean) as ChannelStats[]
-
-    if (validStats.length === 0) {
-      console.warn("No valid stats were fetched for any channel")
-      return { subscriberCount: 0, viewCount: 0 }
-    }
-
-    // Calculate combined stats
-    const combinedStats = validStats.reduce(
-      (acc, curr) => {
-        return {
-          subscriberCount: acc.subscriberCount + curr.subscriberCount,
-          viewCount: acc.viewCount + curr.viewCount,
-        }
-      },
-      { subscriberCount: 0, viewCount: 0 },
-    )
 
     return combinedStats
   } catch (err) {
     console.error("Error fetching YouTube stats:", err)
-    // Return default values instead of null
-    return { subscriberCount: 0, viewCount: 0 }
+    return null
   }
 }

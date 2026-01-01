@@ -15,6 +15,8 @@ import { deleteExperience } from "@/app/actions/experience-actions"
 import { deleteClient } from "@/app/actions/client-actions"
 import { RatingsManager } from "@/components/admin/ratings-manager"
 import { getAllRatings } from "@/app/actions/admin-actions"
+import { getResources } from "@/app/actions/resource-actions"
+import { deleteFAQ } from "@/app/actions/faq-actions"
 
 export default function AdminDashboardPage() {
   const [isLoading, setIsLoading] = useState(true)
@@ -25,6 +27,8 @@ export default function AdminDashboardPage() {
   const [messages, setMessages] = useState([])
   const [unreadCount, setUnreadCount] = useState(0)
   const [ratings, setRatings] = useState([])
+  const [resources, setResources] = useState([])
+  const [faqs, setFaqs] = useState([])
 
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -46,6 +50,8 @@ export default function AdminDashboardPage() {
         clientsResponse,
         messagesResponse,
         ratingsResponse,
+        resourcesResponse,
+        faqsResponse,
       ] = await Promise.all([
         supabase.from("projects").select("*").order("created_at", { ascending: false }),
         supabase.from("education").select("*").order("display_order", { ascending: true }),
@@ -53,6 +59,8 @@ export default function AdminDashboardPage() {
         supabase.from("clients").select("*").order("name", { ascending: true }),
         supabase.from("messages").select("*").order("created_at", { ascending: false }),
         getAllRatings(),
+        getResources(),
+        supabase.from("faqs").select("*").order("created_at", { ascending: false }),
       ])
 
       // Handle errors
@@ -63,6 +71,7 @@ export default function AdminDashboardPage() {
       if (experienceResponse.error) throw experienceResponse.error
       if (clientsResponse.error) throw clientsResponse.error
       if (messagesResponse.error) throw messagesResponse.error
+      if (faqsResponse.error) throw faqsResponse.error
 
       // Set state with fetched data
       setProjects(projectsResponse.data || [])
@@ -71,6 +80,8 @@ export default function AdminDashboardPage() {
       setClients(clientsResponse.data || [])
       setMessages(messagesResponse.data || [])
       setRatings(ratingsResponse.success ? ratingsResponse.data : [])
+      setResources(resourcesResponse || [])
+      setFaqs(faqsResponse.data || [])
 
       // Count unread messages
       const unread = messagesResponse.data ? messagesResponse.data.filter((msg) => !msg.read).length : 0
@@ -219,6 +230,38 @@ export default function AdminDashboardPage() {
     [fetchData, toast],
   )
 
+  const handleDeleteFAQ = useCallback(
+    async (id) => {
+      if (!confirm("Are you sure you want to delete this FAQ? This action cannot be undone.")) {
+        return
+      }
+
+      try {
+        const result = await deleteFAQ(id)
+
+        if (!result.success) {
+          throw new Error(result.message)
+        }
+
+        toast({
+          title: "FAQ deleted",
+          description: result.message,
+        })
+
+        // Refresh data
+        fetchData()
+      } catch (error) {
+        console.error("Error deleting FAQ:", error)
+        toast({
+          title: "Delete failed",
+          description: "There was an error deleting the FAQ",
+          variant: "destructive",
+        })
+      }
+    },
+    [fetchData, toast],
+  )
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -262,7 +305,9 @@ export default function AdminDashboardPage() {
               )}
             </TabsTrigger>
             <TabsTrigger value="ratings">Ratings</TabsTrigger>
+            <TabsTrigger value="resources">Resources</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
+            <TabsTrigger value="faqs">FAQs</TabsTrigger>
           </TabsList>
 
           <TabsContent value="projects">
@@ -611,6 +656,14 @@ export default function AdminDashboardPage() {
                     <CardTitle>No Messages</CardTitle>
                     <CardDescription>You haven't received any messages yet.</CardDescription>
                   </CardHeader>
+                  <CardFooter>
+                    <Button asChild>
+                      <Link href="/admin/messages">
+                        <MessageSquare className="mr-2 h-4 w-4" />
+                        View All Messages
+                      </Link>
+                    </Button>
+                  </CardFooter>
                 </Card>
               ) : (
                 <Card>
@@ -657,6 +710,83 @@ export default function AdminDashboardPage() {
                 <h2 className="text-2xl font-bold">Project Ratings</h2>
               </div>
               <RatingsManager initialRatings={ratings} />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="resources">
+            <div className="grid gap-6">
+              <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-bold">Resources</h2>
+                <Button asChild>
+                  <Link href="/admin/resources/new">
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Add New Resource
+                  </Link>
+                </Button>
+              </div>
+
+              {resources.length === 0 ? (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>No Resources</CardTitle>
+                    <CardDescription>
+                      You haven't added any resources yet. Add your first resource to get started.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardFooter>
+                    <Button asChild>
+                      <Link href="/admin/resources/new">
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        Add New Resource
+                      </Link>
+                    </Button>
+                  </CardFooter>
+                </Card>
+              ) : (
+                <div className="grid gap-4">
+                  {resources.map((resource) => (
+                    <Card key={resource.id}>
+                      <CardHeader className="pb-2">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <CardTitle>{resource.name}</CardTitle>
+                            <CardDescription>{resource.description}</CardDescription>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button asChild variant="outline" size="sm">
+                              <Link href={`/admin/resources/edit/${resource.id}`}>
+                                <Pencil className="mr-1 h-3 w-3" />
+                                Edit
+                              </Link>
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-destructive hover:text-destructive"
+                              onClick={() => handleDeleteFAQ(resource.id)}
+                            >
+                              <Trash2 className="mr-1 h-3 w-3" />
+                              Delete
+                            </Button>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm text-muted-foreground">
+                          <Link
+                            href={resource.link_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="hover:underline"
+                          >
+                            {resource.link_url}
+                          </Link>
+                        </p>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
             </div>
           </TabsContent>
 
@@ -708,6 +838,79 @@ export default function AdminDashboardPage() {
                     </Button>
                   </CardContent>
                 </Card>
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="faqs">
+            <div className="grid gap-6">
+              <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-bold">FAQs</h2>
+                <Button asChild>
+                  <Link href="/admin/faqs/new">
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Add New FAQ
+                  </Link>
+                </Button>
+              </div>
+
+              {faqs.length === 0 ? (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>No FAQs</CardTitle>
+                    <CardDescription>
+                      You haven't added any FAQs yet. Add your first FAQ to get started.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardFooter>
+                    <Button asChild>
+                      <Link href="/admin/faqs/new">
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        Add New FAQ
+                      </Link>
+                    </Button>
+                  </CardFooter>
+                </Card>
+              ) : (
+                <div className="grid gap-4">
+                  {faqs.slice(0, 3).map((faq) => (
+                    <Card key={faq.id}>
+                      <CardHeader className="pb-2">
+                        <div className="flex justify-between items-start">
+                          <CardTitle>{faq.question}</CardTitle>
+                          <div className="flex gap-2">
+                            <Button asChild variant="outline" size="sm">
+                              <Link href={`/admin/faqs/edit/${faq.id}`}>
+                                <Pencil className="mr-1 h-3 w-3" />
+                                Edit
+                              </Link>
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-destructive hover:text-destructive"
+                              onClick={() => handleDeleteFAQ(faq.id)}
+                            >
+                              <Trash2 className="mr-1 h-3 w-3" />
+                              Delete
+                            </Button>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm text-muted-foreground line-clamp-2">{faq.answer}</p>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+              <div className="flex justify-center mt-4">
+                <Button asChild variant="outline">
+                  <Link href="/admin/faqs">
+                    <MessageSquare className="mr-2 h-4 w-4" />
+                    Manage All FAQs
+                  </Link>
+                </Button>
               </div>
             </div>
           </TabsContent>

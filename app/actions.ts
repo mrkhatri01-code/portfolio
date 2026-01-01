@@ -168,3 +168,291 @@ export async function addYoutubeVideo(projectId: string, youtubeUrl: string, tit
     }
   }
 }
+
+export async function createBlog(formData: FormData) {
+  const supabase = createServerSupabaseClient()
+
+  const title = formData.get("title") as string
+  const slug = formData.get("slug") as string
+  const excerpt = formData.get("excerpt") as string
+  const content = formData.get("content") as string
+  const seoTitle = formData.get("seoTitle") as string
+  const seoDescription = formData.get("seoDescription") as string
+  const seoKeywords = formData.get("seoKeywords") as string
+  const featuredImage = formData.get("featuredImage") as string
+  const published = formData.get("published") === "on"
+
+  if (!title || !slug || !excerpt || !content) {
+    return { success: false, message: "Required fields missing" }
+  }
+
+  try {
+    const { data: blog, error } = await supabase
+      .from("blogs")
+      .insert([
+        {
+          title,
+          slug,
+          excerpt,
+          content,
+          seo_title: seoTitle || title,
+          seo_description: seoDescription || excerpt,
+          seo_keywords: seoKeywords,
+          featured_image: featuredImage,
+          published,
+          published_at: published ? new Date().toISOString() : null,
+          author_id: "system", // Will be updated with actual user auth
+        },
+      ])
+      .select()
+
+    if (error) throw error
+
+    revalidatePath("/blog")
+    revalidatePath("/")
+
+    return { success: true, message: "Blog created successfully!", blogId: blog[0].id }
+  } catch (error) {
+    console.error("Error creating blog:", error)
+    return { success: false, message: "Failed to create blog" }
+  }
+}
+
+export async function updateBlog(blogId: string, formData: FormData) {
+  const supabase = createServerSupabaseClient()
+
+  const title = formData.get("title") as string
+  const slug = formData.get("slug") as string
+  const excerpt = formData.get("excerpt") as string
+  const content = formData.get("content") as string
+  const seoTitle = formData.get("seoTitle") as string
+  const seoDescription = formData.get("seoDescription") as string
+  const seoKeywords = formData.get("seoKeywords") as string
+  const featuredImage = formData.get("featuredImage") as string
+  const published = formData.get("published") === "on"
+
+  try {
+    const { error } = await supabase
+      .from("blogs")
+      .update({
+        title,
+        slug,
+        excerpt,
+        content,
+        seo_title: seoTitle || title,
+        seo_description: seoDescription || excerpt,
+        seo_keywords: seoKeywords,
+        featured_image: featuredImage,
+        published,
+        published_at: published ? new Date().toISOString() : null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", blogId)
+
+    if (error) throw error
+
+    revalidatePath("/blog")
+    revalidatePath(`/blog/${slug}`)
+    revalidatePath("/")
+
+    return { success: true, message: "Blog updated successfully!" }
+  } catch (error) {
+    console.error("Error updating blog:", error)
+    return { success: false, message: "Failed to update blog" }
+  }
+}
+
+export async function deleteBlog(blogId: string) {
+  const supabase = createServerSupabaseClient()
+
+  try {
+    // Delete relations first
+    await supabase.from("blog_category_relations").delete().eq("blog_id", blogId)
+    await supabase.from("blog_tag_relations").delete().eq("blog_id", blogId)
+
+    // Delete blog
+    const { error } = await supabase.from("blogs").delete().eq("id", blogId)
+
+    if (error) throw error
+
+    revalidatePath("/blog")
+    revalidatePath("/")
+
+    return { success: true, message: "Blog deleted successfully!" }
+  } catch (error) {
+    console.error("Error deleting blog:", error)
+    return { success: false, message: "Failed to delete blog" }
+  }
+}
+
+export async function addBlogCategory(blogId: string, categoryId: string) {
+  const supabase = createServerSupabaseClient()
+
+  try {
+    const { error } = await supabase
+      .from("blog_category_relations")
+      .insert([{ blog_id: blogId, category_id: categoryId }])
+
+    if (error) throw error
+
+    return { success: true, message: "Category added" }
+  } catch (error) {
+    console.error("Error adding category:", error)
+    return { success: false, message: "Failed to add category" }
+  }
+}
+
+export async function removeBlogCategory(blogId: string, categoryId: string) {
+  const supabase = createServerSupabaseClient()
+
+  try {
+    const { error } = await supabase
+      .from("blog_category_relations")
+      .delete()
+      .eq("blog_id", blogId)
+      .eq("category_id", categoryId)
+
+    if (error) throw error
+
+    return { success: true, message: "Category removed" }
+  } catch (error) {
+    console.error("Error removing category:", error)
+    return { success: false, message: "Failed to remove category" }
+  }
+}
+
+export async function addBlogTag(blogId: string, tagId: string) {
+  const supabase = createServerSupabaseClient()
+
+  try {
+    const { error } = await supabase.from("blog_tag_relations").insert([{ blog_id: blogId, tag_id: tagId }])
+
+    if (error) throw error
+
+    return { success: true, message: "Tag added" }
+  } catch (error) {
+    console.error("Error adding tag:", error)
+    return { success: false, message: "Failed to add tag" }
+  }
+}
+
+export async function removeBlogTag(blogId: string, tagId: string) {
+  const supabase = createServerSupabaseClient()
+
+  try {
+    const { error } = await supabase.from("blog_tag_relations").delete().eq("blog_id", blogId).eq("tag_id", tagId)
+
+    if (error) throw error
+
+    return { success: true, message: "Tag removed" }
+  } catch (error) {
+    console.error("Error removing tag:", error)
+    return { success: false, message: "Failed to remove tag" }
+  }
+}
+
+export async function createCategory(name: string, description: string) {
+  const supabase = createServerSupabaseClient()
+
+  const slug = name.toLowerCase().replace(/\s+/g, "-")
+
+  try {
+    const { data, error } = await supabase.from("blog_categories").insert([{ name, description, slug }]).select()
+
+    if (error) throw error
+
+    return { success: true, message: "Category created", categoryId: data[0].id }
+  } catch (error) {
+    console.error("Error creating category:", error)
+    return { success: false, message: "Failed to create category" }
+  }
+}
+
+export async function updateCategory(categoryId: string, name: string, description: string) {
+  const supabase = createServerSupabaseClient()
+
+  const slug = name.toLowerCase().replace(/\s+/g, "-")
+
+  try {
+    const { error } = await supabase.from("blog_categories").update({ name, description, slug }).eq("id", categoryId)
+
+    if (error) throw error
+
+    return { success: true, message: "Category updated" }
+  } catch (error) {
+    console.error("Error updating category:", error)
+    return { success: false, message: "Failed to update category" }
+  }
+}
+
+export async function deleteCategory(categoryId: string) {
+  const supabase = createServerSupabaseClient()
+
+  try {
+    // Delete relations first
+    await supabase.from("blog_category_relations").delete().eq("category_id", categoryId)
+
+    // Delete category
+    const { error } = await supabase.from("blog_categories").delete().eq("id", categoryId)
+
+    if (error) throw error
+
+    return { success: true, message: "Category deleted" }
+  } catch (error) {
+    console.error("Error deleting category:", error)
+    return { success: false, message: "Failed to delete category" }
+  }
+}
+
+export async function createTag(name: string) {
+  const supabase = createServerSupabaseClient()
+
+  const slug = name.toLowerCase().replace(/\s+/g, "-")
+
+  try {
+    const { data, error } = await supabase.from("blog_tags").insert([{ name, slug }]).select()
+
+    if (error) throw error
+
+    return { success: true, message: "Tag created", tagId: data[0].id }
+  } catch (error) {
+    console.error("Error creating tag:", error)
+    return { success: false, message: "Failed to create tag" }
+  }
+}
+
+export async function updateTag(tagId: string, name: string) {
+  const supabase = createServerSupabaseClient()
+
+  const slug = name.toLowerCase().replace(/\s+/g, "-")
+
+  try {
+    const { error } = await supabase.from("blog_tags").update({ name, slug }).eq("id", tagId)
+
+    if (error) throw error
+
+    return { success: true, message: "Tag updated" }
+  } catch (error) {
+    console.error("Error updating tag:", error)
+    return { success: false, message: "Failed to update tag" }
+  }
+}
+
+export async function deleteTag(tagId: string) {
+  const supabase = createServerSupabaseClient()
+
+  try {
+    // Delete relations first
+    await supabase.from("blog_tag_relations").delete().eq("tag_id", tagId)
+
+    // Delete tag
+    const { error } = await supabase.from("blog_tags").delete().eq("id", tagId)
+
+    if (error) throw error
+
+    return { success: true, message: "Tag deleted" }
+  } catch (error) {
+    console.error("Error deleting tag:", error)
+    return { success: false, message: "Failed to delete tag" }
+  }
+}

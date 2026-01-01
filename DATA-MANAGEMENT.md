@@ -18,7 +18,7 @@ The data managers are the foundation of the system. They provide a consistent in
 
 The `BaseManager` class provides common functionality for all data managers:
 
-\`\`\`typescript
+```typescript
 class BaseManager<T> {
   protected tableName: string;
 

@@ -1,0 +1,87 @@
+"use client"
+
+import type React from "react"
+
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { deleteResource } from "@/app/actions/resource-actions"
+import { useToast } from "@/hooks/use-toast"
+
+interface DeleteResourceButtonProps {
+  resourceId: string
+  resourceName: string
+  children: React.ReactNode
+}
+
+export function DeleteResourceButton({ resourceId, resourceName, children }: DeleteResourceButtonProps) {
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
+  const router = useRouter()
+  const { toast } = useToast()
+
+  async function handleDelete() {
+    setIsDeleting(true)
+    try {
+      const result = await deleteResource(resourceId)
+
+      if (!result.success) {
+        throw new Error(result.message)
+      }
+
+      toast({
+        title: "Resource deleted",
+        description: result.message,
+      })
+
+      router.refresh()
+    } catch (error) {
+      console.error("Error deleting resource:", error)
+      toast({
+        title: "Delete failed",
+        description: error instanceof Error ? error.message : "Failed to delete resource",
+        variant: "destructive",
+      })
+    } finally {
+      setIsDeleting(false)
+      setShowConfirm(false)
+    }
+  }
+
+  return (
+    <>
+      <div onClick={() => setShowConfirm(true)} className={isDeleting ? "opacity-50 pointer-events-none" : ""}>
+        {children}
+      </div>
+
+      {showConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="w-full max-w-md rounded-lg bg-white p-6 dark:bg-gray-800">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white">Delete Resource</h3>
+            <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+              Are you sure you want to delete the resource: <strong>{resourceName}</strong>? This action cannot be
+              undone.
+            </p>
+            <div className="mt-4 flex justify-end space-x-3">
+              <button
+                type="button"
+                onClick={() => setShowConfirm(false)}
+                disabled={isDeleting}
+                className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDelete}
+                disabled={isDeleting}
+                className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50"
+              >
+                {isDeleting ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  )
+}

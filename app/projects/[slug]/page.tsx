@@ -1,4 +1,5 @@
 import Link from "next/link"
+import Image from "next/image"
 import { notFound } from "next/navigation"
 import { ArrowLeft, ExternalLink } from "lucide-react"
 import { Header } from "@/components/header"
@@ -11,7 +12,6 @@ import { RatingForm } from "@/components/rating-form"
 import { RatingsDisplay } from "@/components/ratings-display"
 import { ProjectDescription } from "@/components/project-description"
 import { ProjectFiles } from "@/components/project-files"
-import { ImageGallery } from "@/components/image-gallery"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { getSettings, getProjectBySlug } from "@/lib/data"
 
@@ -52,29 +52,13 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
     day: "numeric",
   })
 
-  // Prepare project images for the gallery
-  const projectImages = [
-    // Add main image as the first image if it exists
-    ...(project.main_image_url
-      ? [
-          {
-            id: "main-image",
-            image_url: project.main_image_url,
-            alt_text: `${project.title} main image`,
-          },
-        ]
-      : []),
-    // Add additional project images if they exist
-    ...(project.project_images || []),
-  ]
-
   return (
     <div className="flex min-h-screen flex-col">
       <Header siteTitle={siteTitle} />
 
       <main className="flex-1 py-16">
         <div className="container">
-          {/* Navigation button */}
+          {/* Added back the navigation button with improved styling */}
           <div className="mb-8">
             <Button asChild variant="outline" className="group transition-all hover:bg-primary/10">
               <Link href="/projects" className="flex items-center">
@@ -116,9 +100,14 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                 </div>
               )}
 
-              {/* Replace single image with image gallery */}
-              <div className="mb-8">
-                <ImageGallery images={projectImages} />
+              <div className="aspect-video relative rounded-lg overflow-hidden border mb-8">
+                <Image
+                  src={project.main_image_url || `/placeholder.svg?height=600&width=1200`}
+                  alt={project.title}
+                  fill
+                  className="object-cover"
+                  priority
+                />
               </div>
 
               <ProjectDescription description={project.description} className="max-w-3xl mb-8" />

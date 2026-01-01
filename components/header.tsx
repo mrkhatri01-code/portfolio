@@ -22,7 +22,7 @@ export function Header({ siteTitle }: HeaderProps) {
       setScrolled(window.scrollY > 10)
 
       // Determine active section based on scroll position
-      const sections = ["home", "projects", "experience", "education", "about", "contact"]
+      const sections = ["home", "projects", "experience", "education", "about", "contact", "faq", "resources"]
       const scrollPosition = window.scrollY + 100 // Offset for header
 
       for (const section of sections.reverse()) {
@@ -82,7 +82,7 @@ export function Header({ siteTitle }: HeaderProps) {
       <div className="container flex h-16 items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2">
           <Image
-            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/profile-FYwmgktVCXq3rLF2zP2S6eaTFYtKPX.png"
+            src="/images/profile.png"
             alt={siteTitle}
             width={40}
             height={40}
@@ -111,6 +111,9 @@ export function Header({ siteTitle }: HeaderProps) {
           >
             Projects
           </button>
+          <Link href="/blog" className={cn("text-sm font-medium hover:text-primary transition-colors")}>
+            Blog
+          </Link>
           <button
             onClick={() => scrollToSection("experience")}
             className={cn(
@@ -147,6 +150,24 @@ export function Header({ siteTitle }: HeaderProps) {
           >
             Contact
           </button>
+          <button
+            onClick={() => scrollToSection("faq")}
+            className={cn(
+              "text-sm font-medium hover:text-primary transition-colors",
+              activeSection === "faq" && "text-primary",
+            )}
+          >
+            FAQs
+          </button>
+          <button
+            onClick={() => scrollToSection("resources")}
+            className={cn(
+              "text-sm font-medium hover:text-primary transition-colors",
+              activeSection === "resources" && "text-primary",
+            )}
+          >
+            Resources
+          </button>
           <ThemeToggle />
         </nav>
 
@@ -160,7 +181,7 @@ export function Header({ siteTitle }: HeaderProps) {
             <div className="container flex h-16 items-center justify-between">
               <Link href="/" className="flex items-center gap-2">
                 <Image
-                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/profile-FYwmgktVCXq3rLF2zP2S6eaTFYtKPX.png"
+                  src="/images/profile.png"
                   alt={siteTitle}
                   width={40}
                   height={40}
@@ -194,6 +215,12 @@ export function Header({ siteTitle }: HeaderProps) {
               >
                 Projects
               </button>
+              <Link
+                href="/blog"
+                className={cn("text-lg font-medium hover:text-primary text-left transition-colors py-2")}
+              >
+                Blog
+              </Link>
               <button
                 onClick={() => scrollToSection("experience")}
                 className={cn(
@@ -229,6 +256,24 @@ export function Header({ siteTitle }: HeaderProps) {
                 )}
               >
                 Contact
+              </button>
+              <button
+                onClick={() => scrollToSection("faq")}
+                className={cn(
+                  "text-lg font-medium hover:text-primary text-left transition-colors py-2",
+                  activeSection === "faq" && "text-primary",
+                )}
+              >
+                FAQs
+              </button>
+              <button
+                onClick={() => scrollToSection("resources")}
+                className={cn(
+                  "text-lg font-medium hover:text-primary text-left transition-colors py-2",
+                  activeSection === "resources" && "text-primary",
+                )}
+              >
+                Resources
               </button>
               <div className="mt-4">
                 <ThemeToggle />

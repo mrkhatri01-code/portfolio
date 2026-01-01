@@ -7,7 +7,18 @@ import { ExperienceSection } from "@/components/experience-section"
 import { AboutSection } from "@/components/about-section"
 import { ContactSection } from "@/components/contact-section"
 import { ClientsSection } from "@/components/clients-section"
-import { getSettings, getFeaturedProjects, getEducation, getExperience, getFeaturedClients } from "@/lib/data"
+import { FAQSection } from "@/components/faq-section"
+import { ResourceSection } from "@/components/resource-section"
+import { BlogSection } from "@/components/blog-section"
+import {
+  getSettings,
+  getFeaturedProjects,
+  getEducation,
+  getExperience,
+  getFeaturedClients,
+  getFAQs,
+  getResources,
+} from "@/lib/data"
 
 export default async function Home() {
   // Fetch all data with error handling
@@ -16,6 +27,8 @@ export default async function Home() {
   const education = await getEducation()
   const experience = await getExperience()
   const clients = await getFeaturedClients()
+  const faqs = await getFAQs()
+  const resources = await getResources()
 
   // Use settings or fallback values
   const siteTitle = settings?.site_title || "My Portfolio"
@@ -46,10 +59,13 @@ export default async function Home() {
         <HeroSection title={siteTitle} subtitle={siteDescription} />
         {projects && projects.length > 0 && <ProjectsSection projects={projects} />}
         {clients && clients.length > 0 && <ClientsSection clients={clients} />}
+        <BlogSection />
         {experience && experience.length > 0 && <ExperienceSection experience={experience} />}
         {education && education.length > 0 && <EducationSection education={education} />}
         <AboutSection aboutText={aboutText} profileImageUrl={settings?.profile_image_url} />
         <ContactSection />
+        {faqs && faqs.length > 0 && <FAQSection faqs={faqs} />}
+        {resources && resources.length > 0 && <ResourceSection resources={resources} />}
       </main>
 
       <Footer siteTitle={siteTitle} siteDescription={siteDescription} socialLinks={socialLinks} />
