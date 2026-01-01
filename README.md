@@ -32,6 +32,6 @@ A modern, responsive portfolio website built with Next.js, Tailwind CSS, and Sup
 ### Installation
 
 1. Clone the repository:
-   ```bash
+   \`\`\`bash
    git clone https://github.com/yourusername/portfolio-website.git
    cd portfolio-website
